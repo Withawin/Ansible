@@ -260,47 +260,43 @@ def extract_config_values(file_path):
 
     return {"device": device, "interfaces": interfaces, "ospf": ospf, "bgp": bgp}
 
+
 # =============================
 # MAIN
 # =============================
-def main():
-    if len(sys.argv) < 2:
-        write_log("No hostname provided")
-        return
+if len(sys.argv) < 2:
+    print("Usage: python process.py <hostname>")
+    sys.exit(1)
 
-    hostname = sys.argv[1]
-    file_path = os.path.join(JSON_FOLDER, f"{hostname}_PM.json")
+hostname = sys.argv[1]
+file_path = os.path.join(JSON_FOLDER, f"{hostname}_PM.json")
 
-    if not os.path.exists(file_path):
-        write_log(f"Upload NOT completed for {hostname} | File not found")
-        return
+if not os.path.exists(file_path):
+    write_log(f"Upload NOT completed for {hostname} | File not found")
+    sys.exit(1)
 
-    try:
-        client = get_gsheet_client()
-        sh = client.open(SPREADSHEET_NAME)
+try:
+    client = get_gsheet_client()
+    sh = client.open(SPREADSHEET_NAME)
 
-        write_log(f"{hostname} | start upload")
+    write_log(f"{hostname} | start upload")
 
-        result = extract_config_values(file_path)
+    result = extract_config_values(file_path)
 
-        upload_devices(sh, [result["device"]])
-        write_log(f"{hostname} | devices uploaded")
+    upload_devices(sh, [result["device"]])
+    write_log(f"{hostname} | devices uploaded")
 
-        upload_interfaces(sh, result["interfaces"])
-        write_log(f"{hostname} | interfaces uploaded")
+    upload_interfaces(sh, result["interfaces"])
+    write_log(f"{hostname} | interfaces uploaded")
 
-        upload_ospf(sh, result["ospf"])
-        write_log(f"{hostname} | ospf uploaded")
+    upload_ospf(sh, result["ospf"])
+    write_log(f"{hostname} | ospf uploaded")
 
-        upload_bgp(sh, result["bgp"])
-        write_log(f"{hostname} | bgp uploaded")
+    upload_bgp(sh, result["bgp"])
+    write_log(f"{hostname} | bgp uploaded")
 
-        write_log(f"Upload completed for {hostname}")
+    write_log(f"Upload completed for {hostname}")
 
-    except Exception as e:
-        write_log(f"Upload NOT completed for {hostname} | {e}")
-        return
-
-
-if __name__ == "__main__":
-    main()
+except Exception as e:
+    write_log(f"Upload NOT completed for {hostname} | {e}")
+    raise
